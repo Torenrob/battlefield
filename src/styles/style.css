@@ -1,0 +1,69 @@
+body {
+	font-family: "Arial", sans-serif;
+	display: grid;
+	height: 100vh;
+	grid-template-columns: 0.5fr 1fr 1fr 0.5fr;
+	grid-template-rows: 1fr 1fr 1fr;
+}
+.grid {
+	display: grid;
+	grid-template-columns: repeat(10, 40px);
+	margin: 0px;
+}
+.cell {
+	width: 40px;
+	height: 40px;
+	border: 1px solid #ccc;
+	text-align: center;
+	line-height: 40px;
+	cursor: pointer;
+}
+
+.cell:hover {
+	background-color: aqua;
+}
+
+#gridWrap {
+	display: flex;
+	justify-content: space-around;
+	grid-area: 2/2/2/4;
+}
+
+#playerGrid {
+	border: black 1px solid;
+}
+
+#computerGrid {
+	border: black 1px solid;
+}
+
+#nameDialog {
+	visibility: hidden;
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	padding: 0.75%;
+	justify-content: center;
+	width: 22vw;
+	height: 12vh;
+	top: 37%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: rgb(102, 102, 102);
+	border-radius: 15px;
+}
+
+#playerName {
+	grid-area: 3/2/3/2;
+	text-align: center;
+}
+
+#compName {
+	grid-area: 3/3/3/3;
+	text-align: center;
+}
+
+#title {
+	grid-area: 1/2/1/4;
+	text-align: center;
+}

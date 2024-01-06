@@ -1,0 +1,35 @@
+{
+  "name": "battlefield",
+  "version": "1.0.0",
+  "description": "Battlefield game",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "testWatch": "jest --watch *.js"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Torenrob/battlefield.git"
+  },
+  "author": "Toren Robinson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Torenrob/battlefield/issues"
+  },
+  "homepage": "https://github.com/Torenrob/battlefield#readme",
+  "devDependencies": {
+    "@babel/core": "^7.23.7",
+    "@babel/preset-env": "^7.23.7",
+    "babel-jest": "^29.7.0",
+    "css-loader": "^6.8.1",
+    "html-webpack-plugin": "^5.6.0",
+    "jest": "^29.7.0",
+    "lodash": "^4.17.21",
+    "style-loader": "^3.3.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
