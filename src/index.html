@@ -10,7 +10,7 @@
    </head>
 
    <body>
-      <h1 id="title">Battleship Game</h1>
+      <img id="logo">
       <form id="nameDialog">
          <h2 style="text-align: center; color: white;">Enter Your Name</h2>
          <div class="input-group">
@@ -18,15 +18,36 @@
             <button class="btn btn-primary">Submit</button>
          </div>
       </form>
-
+      <div id="placeShipNotice">
+         <h1>Place Ships</h1>
+         <button class="btn btn-primary"
+            style="margin-left: 35px; height: 30px;align-self: center; padding: 0px 15px;">Confirm</button>
+      </div>
       <div id="gridWrap">
          <div class="grid" id="playerGrid">
+            <div id="shipGrid">
+
+            </div>
          </div>
          <div class="grid" id="computerGrid">
          </div>
       </div>
-      <h1 id="playerName"></h1>
-      <h1 id="compName">Bot</h1>
+      <div id="vertHorzWrap">
+         <form name="direction" id="vertHorzChoice">
+            <span>Direction:</span>
+            <div>
+               <input type="radio" id="vert" name="vertHorz" value="vertical">
+               <label for="vert">Vertical</label>
+            </div>
+            <div>
+               <input checked type="radio" id="horz" name="vertHorz" value="horizontal">
+               <label for="horz">Horizontal</label>
+            </div>
+         </form>
+      </div>
+      </div>
+      <h1 id="playerName" style="color: white;"></h1>
+      <h1 id="compName" style="color: white;">Bot</h1>
    </body>
 
 </html>

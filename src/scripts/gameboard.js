@@ -1,5 +1,5 @@
 export class Ship {
-	constructor(length, location) {
+	constructor(length) {
 		this.length = length;
 		this.timesHit = 0;
 		this.sunk = false;
@@ -7,14 +7,12 @@ export class Ship {
 
 	hit() {
 		this.timesHit += 1;
-		console.log(`Its a hit!`);
 		this.isSunk();
 	}
 
 	isSunk() {
 		if (this.timesHit === this.length) {
 			this.sunk = true;
-			console.log(`You sunk their ${this.length} spot ship!`);
 		}
 	}
 }
@@ -29,10 +27,10 @@ export class gameBoard {
 
 	buildBoard() {
 		let map = new Map();
-		for (let x = 0; x < 10; x++) {
-			for (let y = 0; y < 10; y++) {
-				let square = new boardSquare(x, y);
-				map.set(`${x},${y}`, square);
+		for (let y = 1; y < 11; y++) {
+			for (let x = 1; x < 11; x++) {
+				let square = new boardSquare(y, x);
+				map.set(`${y},${x}`, square);
 			}
 		}
 		map.forEach((square) => {
@@ -41,16 +39,15 @@ export class gameBoard {
 		return map;
 	}
 
-	placeShip(length, squareSelected, direction) {
+	placeShip(length, square, direction) {
 		let newShip = new Ship(length);
 		let location = [];
 		let count = 0;
-		let q = [this.boardMap.get(squareSelected)];
-		let visited = new Set();
+		let q = [this.boardMap.get(`${square[0]},${square[1]}`)];
 		if (direction === "vertical") {
 			while (count < length) {
 				let curSqr = q.shift();
-				location.push(`${curSqr.xAxis},${curSqr.yAxis}`);
+				location.push(`${curSqr.yAxis},${curSqr.xAxis}`);
 				visited.add(curSqr);
 				if (!visited.has(curSqr.up) && curSqr.up) {
 					q.push(curSqr.up);
@@ -62,16 +59,13 @@ export class gameBoard {
 			}
 		}
 		if (direction === "horizontal") {
+			let curSqr;
+			console.log(length);
 			while (count < length) {
-				let curSqr = q.shift();
-				location.push(`${curSqr.xAxis},${curSqr.yAxis}`);
-				visited.add(curSqr);
-				if (!visited.has(curSqr.left) && curSqr.left) {
-					q.push(curSqr.left);
-				}
-				if (!visited.has(curSqr.right) && curSqr.right) {
-					q.push(curSqr.right);
-				}
+				curSqr = q.shift();
+				console.log(curSqr);
+				location.push(`${curSqr.yAxis},${curSqr.xAxis}`);
+				q.push(curSqr.right);
 				count++;
 			}
 		}
@@ -89,7 +83,6 @@ export class gameBoard {
 			}
 		}
 		if (hitTrack === 0) {
-			console.log(`It's a miss.`);
 			this.misses.push(`${xAxis},${yAxis}`);
 		}
 		this.trackAllShips();
@@ -103,21 +96,20 @@ export class gameBoard {
 }
 
 export class player {
-	constructor(name) {
+	constructor() {
 		this.board = new gameBoard();
-		this.name = name;
 	}
 }
 
 export class gamePlay {
-	constructor(name) {
-		this.player1 = new player(name);
-		this.computer = new player("Computer");
+	constructor() {
+		this.player1 = new player();
+		this.computer = new player();
 	}
 }
 
 class boardSquare {
-	constructor(x, y) {
+	constructor(y, x) {
 		this.xAxis = x;
 		this.yAxis = y;
 		this.left = null;
@@ -134,9 +126,9 @@ class boardSquare {
 		let y = `${this.yAxis}`;
 		let x = `${this.xAxis}`;
 
-		this.left = this.xAxis == 0 ? null : map.get(`${xMinus},${y}`);
-		this.right = this.xAxis == boardLength - 1 ? null : map.get(`${xPlus},${y}`);
-		this.up = this.yAxis == boardHeight - 1 ? null : map.get(`${x},${yPlus}`);
-		this.down = this.yAxis == 0 ? null : map.get(`${x},${yMinus}`);
+		this.left = this.xAxis == 1 ? null : map.get(`${xMinus},${y}`);
+		this.right = this.xAxis == boardLength ? null : map.get(`${xPlus},${y}`);
+		this.up = this.yAxis == 1 ? null : map.get(`${x},${yMinus}`);
+		this.down = this.yAxis == boardHeight ? null : map.get(`${x},${yPlus}`);
 	}
 }
