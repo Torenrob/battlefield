@@ -27,8 +27,8 @@ export class gameBoard {
 
 	buildBoard() {
 		let map = new Map();
-		for (let y = 1; y < 11; y++) {
-			for (let x = 1; x < 11; x++) {
+		for (let x = 1; x < 11; x++) {
+			for (let y = 1; y < 11; y++) {
 				let square = new boardSquare(y, x);
 				map.set(`${y},${x}`, square);
 			}
@@ -45,25 +45,18 @@ export class gameBoard {
 		let count = 0;
 		let q = [this.boardMap.get(`${square[0]},${square[1]}`)];
 		if (direction === "vertical") {
+			let curSqr;
 			while (count < length) {
-				let curSqr = q.shift();
+				curSqr = q.shift();
 				location.push(`${curSqr.yAxis},${curSqr.xAxis}`);
-				visited.add(curSqr);
-				if (!visited.has(curSqr.up) && curSqr.up) {
-					q.push(curSqr.up);
-				}
-				if (!visited.has(curSqr.down) && curSqr.down) {
-					q.push(curSqr.down);
-				}
+				q.push(curSqr.up);
 				count++;
 			}
 		}
 		if (direction === "horizontal") {
 			let curSqr;
-			console.log(length);
 			while (count < length) {
 				curSqr = q.shift();
-				console.log(curSqr);
 				location.push(`${curSqr.yAxis},${curSqr.xAxis}`);
 				q.push(curSqr.right);
 				count++;
@@ -71,6 +64,7 @@ export class gameBoard {
 		}
 		location = location.sort();
 		this.ships.push({ newShip, location });
+		return location;
 	}
 
 	receiveAttack(xAxis, yAxis) {
@@ -126,9 +120,9 @@ class boardSquare {
 		let y = `${this.yAxis}`;
 		let x = `${this.xAxis}`;
 
-		this.left = this.xAxis == 1 ? null : map.get(`${xMinus},${y}`);
-		this.right = this.xAxis == boardLength ? null : map.get(`${xPlus},${y}`);
-		this.up = this.yAxis == 1 ? null : map.get(`${x},${yMinus}`);
-		this.down = this.yAxis == boardHeight ? null : map.get(`${x},${yPlus}`);
+		this.left = this.xAxis == 1 ? null : map.get(`${y},${xMinus}`);
+		this.right = this.xAxis == boardLength ? null : map.get(`${y},${xPlus}`);
+		this.up = this.yAxis == 1 ? null : map.get(`${yMinus},${x}`);
+		this.down = this.yAxis == boardHeight ? null : map.get(`${yPlus},${x}`);
 	}
 }

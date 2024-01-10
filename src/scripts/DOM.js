@@ -14,17 +14,34 @@ const destroyerImg = document.createElement("img");
 const patrolImg = document.createElement("img");
 const subImg = document.createElement("img");
 battleshipImg.src = battleshipH;
-battleshipImg.setAttribute("id", "battleship");
+battleshipImg.classList.add("battleship");
 carrierImg.src = carrierH;
-carrierImg.setAttribute("id", "carrier");
+carrierImg.classList.add("carrier");
 destroyerImg.src = destroyerH;
-destroyerImg.setAttribute("id", "destroyer");
+destroyerImg.classList.add("destroyer");
 patrolImg.src = patrolH;
-patrolImg.setAttribute("id", "patrol");
+patrolImg.classList.add("patrol");
 subImg.src = subH;
-subImg.setAttribute("id", "sub");
+subImg.classList.add("sub");
 
-const shipArr = [carrierImg, battleshipImg, destroyerImg, subImg, patrolImg];
+const battleshipImgComp = document.createElement("img");
+const carrierImgComp = document.createElement("img");
+const destroyerImgComp = document.createElement("img");
+const patrolImgComp = document.createElement("img");
+const subImgComp = document.createElement("img");
+battleshipImgComp.src = battleshipH;
+battleshipImgComp.classList.add("battleship");
+carrierImgComp.src = carrierH;
+carrierImgComp.classList.add("carrier");
+destroyerImgComp.src = destroyerH;
+destroyerImgComp.classList.add("destroyer");
+patrolImgComp.src = patrolH;
+patrolImgComp.classList.add("patrol");
+subImgComp.src = subH;
+subImgComp.classList.add("sub");
+
+const shipArrPlayer = [carrierImg, battleshipImg, destroyerImg, subImg, patrolImg];
+const shipArrComp = [carrierImgComp, battleshipImgComp, destroyerImgComp, subImgComp, patrolImgComp];
 
 export const playerGridElement = document.getElementById("playerGrid");
 export const computerGridElement = document.getElementById("computerGrid");
@@ -35,7 +52,7 @@ const placeShipNotice = document.getElementById("placeShipNotice");
 const vertHorz = document.getElementById("vertHorzWrap");
 const vertHorzChoice = document.getElementById("vertHorzChoice");
 
-export function createGrid(gridElement, player = "computer") {
+function createGrid(gridElement, player = "computer") {
 	for (let y = 1; y < 11; y++) {
 		for (let x = 1; x < 11; x++) {
 			const cell = document.createElement("div");
@@ -47,7 +64,7 @@ export function createGrid(gridElement, player = "computer") {
 	}
 }
 
-export function getName(gameLogic) {
+function getName(gameLogic) {
 	nameDialog.style.visibility = "visible";
 	nameDialog.addEventListener("submit", (x) => {
 		x.preventDefault();
@@ -56,16 +73,17 @@ export function getName(gameLogic) {
 		nameDialog.style.visibility = "hidden";
 		playerNameDisplay.textContent = name;
 		placeShipVisibility();
-		placeShips(shipArr, gameLogic.player1.board);
+		placeShips(shipArrPlayer, gameLogic.player1.board);
+		// placeShips(shipArrComp, gameLogic.computer.board);
 	});
 }
 
-export function placeShips(shipArr, board, direction = "horizontal") {
-	console.log(board);
+function placeShips(shipArr, board, direction = "horizontal", occupiedSquares = []) {
 	let playerCells = Array.from(document.getElementsByClassName("playerCell"));
 	document.direction.vertHorz[1].checked = true;
 	let ship = shipArr.shift();
 	let length;
+
 	switch (ship) {
 		case carrierImg:
 			length = 5;
@@ -83,10 +101,12 @@ export function placeShips(shipArr, board, direction = "horizontal") {
 			length = 2;
 			break;
 	}
+
 	let vertChangeL = (x) => {
 		direction = direction === "horizontal" ? "vertical" : "horizontal";
-		controlShipDirection(x, ship, direction);
+		controlShipDirection(x, ship, direction, length);
 	};
+
 	let gridL = (x) => gridShipPlace(x, direction);
 	shipGrid.append(ship);
 	vertHorzChoice.addEventListener("change", vertChangeL);
@@ -97,9 +117,11 @@ export function placeShips(shipArr, board, direction = "horizontal") {
 	});
 
 	function clickL(el) {
+		if (ship.classList.contains("shipOverlap")) {
+			return;
+		}
 		let xYCoor = ship.style.gridArea.split(" / ");
-		board.placeShip(length, xYCoor, direction);
-		console.log(board);
+		occupiedSquares = occupiedSquares.concat(board.placeShip(length, xYCoor, direction));
 		playerCells.forEach((x) => {
 			x.removeEventListener("mouseover", gridL);
 			x.removeEventListener("click", clickL);
@@ -107,41 +129,63 @@ export function placeShips(shipArr, board, direction = "horizontal") {
 		vertHorzChoice.removeEventListener("change", vertChangeL);
 		if (shipArr.length > 0) {
 			direction = "horizontal";
-			placeShips(shipArr, board, direction);
+			placeShips(shipArr, board, direction, occupiedSquares);
 		} else {
 			alert("Game Start");
+			placeShipVisibility();
 			return;
 		}
 	}
 
 	function gridShipPlace(x, direction) {
 		let coor = x.target.attributes.grid.value.split(",");
-		if (direction === "horizontal" && coor[1] >= 11 - length) {
-			ship.style.gridArea = `${coor[0]}/${11 - length}`;
-		} else if (direction === "vertical" && coor[0] <= length) {
-			ship.style.gridArea = `${length}/${coor[1]}`;
+		let shipSpan = [];
+		if (direction === "horizontal") {
+			if (coor[1] >= 11 - length) {
+				ship.style.gridArea = `${coor[0]}/${11 - length}`;
+			} else {
+				ship.style.gridArea = `${coor[0]}/${coor[1]}`;
+			}
+			let shipGridRoot = ship.style.gridArea.split(" / ");
+			for (let i = 0; i < length; i++) {
+				shipSpan.push(`${shipGridRoot[0]},${Number(shipGridRoot[1]) + i}`);
+			}
+		} else if (direction === "vertical") {
+			if (coor[0] <= length) {
+				ship.style.gridArea = `${length}/${coor[1]}`;
+			} else {
+				ship.style.gridArea = `${coor[0]}/${coor[1]}`;
+			}
+			let shipGridRoot = ship.style.gridArea.split(" / ");
+			for (let i = 0; i < length; i++) {
+				shipSpan.push(`${Number(shipGridRoot[0]) - i},${shipGridRoot[1]}`);
+			}
+		}
+
+		console.log(shipSpan);
+		console.log(occupiedSquares);
+
+		if (shipSpan.some((space) => occupiedSquares.includes(space))) {
+			ship.classList.add("shipOverlap");
 		} else {
-			ship.style.gridArea = `${coor[0]}/${coor[1]}`;
+			ship.classList.remove("shipOverlap");
 		}
 	}
-}
 
-function controlShipDirection(x, ship, direction) {
-	direction = x.target.value;
-	let pixWidth = ship.clientWidth;
-	let hold = ship.style.gridArea.split("/");
-	if (direction === "vertical") {
-		if (ship.style.gridArea === "" || ship.style.gridArea.split("/")[0] <= ship.length) {
-			hold = ship.style.gridArea.split("/");
-			ship.style.gridArea = hold.length === 1 ? `${length}/1` : `${length}/${hold[1]}`;
+	function controlShipDirection(x, ship, direction, length) {
+		direction = x.target.value;
+		let hold = ship.style.gridArea.split(" / ");
+		if (direction === "vertical") {
+			if (hold[0] === "" || hold[0] <= length) {
+				ship.style.gridArea = hold.length === 1 ? `${length}/1` : `${length}/${hold[1]}`;
+			}
+			ship.classList.add("vertical");
+		} else {
+			if (hold[1] >= 11 - length) {
+				ship.style.gridArea = `${hold[0]}/${11 - length}`;
+			}
+			ship.classList.remove("vertical");
 		}
-		ship.classList.add("vertical");
-	} else {
-		if (ship.style.gridArea.split("/")[0] >= 11 - length) {
-			hold = ship.style.gridArea.split("/");
-			ship.style.gridArea = `${hold[0]}/${11 - length}`;
-		}
-		ship.classList.remove("vertical");
 	}
 }
 
@@ -154,9 +198,10 @@ function placeShipVisibility() {
 		playerNameDisplay.style.paddingTop = "0px";
 		placeShipNotice.style.visibility = "hidden";
 		vertHorz.style.visibility = "hidden";
-		piecePick.style.visibility = "hidden";
 	}
 }
+
+function placeCompShips() {}
 
 export function gameMode(gameLogic) {
 	createGrid(playerGridElement, "player");
