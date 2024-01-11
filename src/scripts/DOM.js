@@ -1,3 +1,4 @@
+import random from "../../node_modules/lodash/random.js";
 import * as gaming from "./gameboard.js";
 import logoImg from "../assets/imgbin_battleship-wii-u-xbox-360-nintendo-ds-png.png";
 const logo = document.getElementById("logo");
@@ -73,118 +74,133 @@ function getName(gameLogic) {
 		nameDialog.style.visibility = "hidden";
 		playerNameDisplay.textContent = name;
 		placeShipVisibility();
-		placeShips(shipArrPlayer, gameLogic.player1.board);
-		// placeShips(shipArrComp, gameLogic.computer.board);
+		placeShips(shipArrPlayer, gameLogic, "player");
 	});
 }
 
-function placeShips(shipArr, board, direction = "horizontal", occupiedSquares = []) {
+function placeShips(shipArr, gameLogic, user, direction = "horizontal", occupiedSquares = []) {
+	let board = user === "player" ? gameLogic.player1.board : gameLogic.computer.board;
 	let playerCells = Array.from(document.getElementsByClassName("playerCell"));
 	document.direction.vertHorz[1].checked = true;
 	let ship = shipArr.shift();
 	let length;
 
-	switch (ship) {
-		case carrierImg:
+	switch (ship.classList[0]) {
+		case "carrier":
 			length = 5;
 			break;
-		case battleshipImg:
+		case "battleship":
 			length = 4;
 			break;
-		case destroyerImg:
+		case "destroyer":
 			length = 3;
 			break;
-		case subImg:
+		case "sub":
 			length = 3;
 			break;
-		case patrolImg:
+		case "patrol":
 			length = 2;
 			break;
 	}
 
-	let vertChangeL = (x) => {
-		direction = direction === "horizontal" ? "vertical" : "horizontal";
-		controlShipDirection(x, ship, direction, length);
-	};
-
-	let gridL = (x) => gridShipPlace(x, direction);
-	shipGrid.append(ship);
-	vertHorzChoice.addEventListener("change", vertChangeL);
-
-	playerCells.forEach((el) => {
-		el.addEventListener("mouseover", gridL);
-		el.addEventListener("click", clickL);
-	});
-
-	function clickL(el) {
-		if (ship.classList.contains("shipOverlap")) {
-			return;
+	if (user === "comp") {
+		direction = random(1, 2) === 1 ? "horizontal" : "vertical";
+		let xYCoor = direction === "horizontal" ? [`${random(1, 10)}`, `${random(1, 11 - length)}`] : [`${random(length, 10)}`, `${random(1, 10)}`];
+		let shipSqrs = board.placeShip(length, xYCoor, direction);
+		if (shipSqrs.some((x) => occupiedSquares.includes(x))) {
+			shipArr.push(ship);
+			board.ships.pop();
+			placeShips(shipArr, gameLogic, "comp", direction, occupiedSquares);
+		} else {
+			occupiedSquares = occupiedSquares.concat(shipSqrs);
+			if (shipArr.length > 0) {
+				placeShips(shipArr, gameLogic, "comp", direction, occupiedSquares);
+			} else {
+				alert("Comp Created - Game Start");
+				return;
+			}
 		}
-		let xYCoor = ship.style.gridArea.split(" / ");
-		occupiedSquares = occupiedSquares.concat(board.placeShip(length, xYCoor, direction));
-		playerCells.forEach((x) => {
-			x.removeEventListener("mouseover", gridL);
-			x.removeEventListener("click", clickL);
+	} else {
+		let vertChangeL = (x) => {
+			direction = direction === "horizontal" ? "vertical" : "horizontal";
+			controlShipDirection(x, ship, direction, length);
+		};
+
+		let gridL = (x) => gridShipPlace(x, direction);
+		shipGrid.append(ship);
+		vertHorzChoice.addEventListener("change", vertChangeL);
+
+		playerCells.forEach((el) => {
+			el.addEventListener("mouseover", gridL);
+			el.addEventListener("click", clickL);
 		});
-		vertHorzChoice.removeEventListener("change", vertChangeL);
-		if (shipArr.length > 0) {
-			direction = "horizontal";
-			placeShips(shipArr, board, direction, occupiedSquares);
-		} else {
-			alert("Game Start");
-			placeShipVisibility();
-			return;
-		}
-	}
 
-	function gridShipPlace(x, direction) {
-		let coor = x.target.attributes.grid.value.split(",");
-		let shipSpan = [];
-		if (direction === "horizontal") {
-			if (coor[1] >= 11 - length) {
-				ship.style.gridArea = `${coor[0]}/${11 - length}`;
+		function clickL() {
+			if (ship.classList.contains("shipOverlap")) {
+				return;
+			}
+			let xYCoor = ship.style.gridArea.split(" / ");
+			occupiedSquares = occupiedSquares.concat(board.placeShip(length, xYCoor, direction));
+			playerCells.forEach((x) => {
+				x.removeEventListener("mouseover", gridL);
+				x.removeEventListener("click", clickL);
+			});
+			vertHorzChoice.removeEventListener("change", vertChangeL);
+			if (shipArr.length > 0) {
+				direction = "horizontal";
+				placeShips(shipArr, gameLogic, "player", direction, occupiedSquares);
 			} else {
-				ship.style.gridArea = `${coor[0]}/${coor[1]}`;
+				placeShipVisibility();
+				placeShips(shipArrComp, gameLogic, "comp");
 			}
-			let shipGridRoot = ship.style.gridArea.split(" / ");
-			for (let i = 0; i < length; i++) {
-				shipSpan.push(`${shipGridRoot[0]},${Number(shipGridRoot[1]) + i}`);
+		}
+
+		function gridShipPlace(x, direction) {
+			let coor = x.target.attributes.grid.value.split(",");
+			let shipSpan = [];
+			if (direction === "horizontal") {
+				if (coor[1] >= 11 - length) {
+					ship.style.gridArea = `${coor[0]}/${11 - length}`;
+				} else {
+					ship.style.gridArea = `${coor[0]}/${coor[1]}`;
+				}
+				let shipGridRoot = ship.style.gridArea.split(" / ");
+				for (let i = 0; i < length; i++) {
+					shipSpan.push(`${shipGridRoot[0]},${Number(shipGridRoot[1]) + i}`);
+				}
+			} else if (direction === "vertical") {
+				if (coor[0] <= length) {
+					ship.style.gridArea = `${length}/${coor[1]}`;
+				} else {
+					ship.style.gridArea = `${coor[0]}/${coor[1]}`;
+				}
+				let shipGridRoot = ship.style.gridArea.split(" / ");
+				for (let i = 0; i < length; i++) {
+					shipSpan.push(`${Number(shipGridRoot[0]) - i},${shipGridRoot[1]}`);
+				}
 			}
-		} else if (direction === "vertical") {
-			if (coor[0] <= length) {
-				ship.style.gridArea = `${length}/${coor[1]}`;
+
+			if (shipSpan.some((space) => occupiedSquares.includes(space))) {
+				ship.classList.add("shipOverlap");
 			} else {
-				ship.style.gridArea = `${coor[0]}/${coor[1]}`;
-			}
-			let shipGridRoot = ship.style.gridArea.split(" / ");
-			for (let i = 0; i < length; i++) {
-				shipSpan.push(`${Number(shipGridRoot[0]) - i},${shipGridRoot[1]}`);
+				ship.classList.remove("shipOverlap");
 			}
 		}
 
-		console.log(shipSpan);
-		console.log(occupiedSquares);
-
-		if (shipSpan.some((space) => occupiedSquares.includes(space))) {
-			ship.classList.add("shipOverlap");
-		} else {
-			ship.classList.remove("shipOverlap");
-		}
-	}
-
-	function controlShipDirection(x, ship, direction, length) {
-		direction = x.target.value;
-		let hold = ship.style.gridArea.split(" / ");
-		if (direction === "vertical") {
-			if (hold[0] === "" || hold[0] <= length) {
-				ship.style.gridArea = hold.length === 1 ? `${length}/1` : `${length}/${hold[1]}`;
+		function controlShipDirection(x, ship, direction, length) {
+			direction = x.target.value;
+			let hold = ship.style.gridArea.split(" / ");
+			if (direction === "vertical") {
+				if (hold[0] === "" || hold[0] <= length) {
+					ship.style.gridArea = hold.length === 1 ? `${length}/1` : `${length}/${hold[1]}`;
+				}
+				ship.classList.add("vertical");
+			} else {
+				if (hold[1] >= 11 - length) {
+					ship.style.gridArea = `${hold[0]}/${11 - length}`;
+				}
+				ship.classList.remove("vertical");
 			}
-			ship.classList.add("vertical");
-		} else {
-			if (hold[1] >= 11 - length) {
-				ship.style.gridArea = `${hold[0]}/${11 - length}`;
-			}
-			ship.classList.remove("vertical");
 		}
 	}
 }
