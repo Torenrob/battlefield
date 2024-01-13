@@ -39,10 +39,11 @@ export class gameBoard {
 		return map;
 	}
 
-	placeShip(length, square, direction) {
+	placeShip(length, square, direction, shipEl = null) {
 		let newShip = new Ship(length);
 		let location = [];
 		let count = 0;
+		let root = square;
 		let q = [this.boardMap.get(`${square[0]},${square[1]}`)];
 		if (direction === "vertical") {
 			let curSqr;
@@ -63,14 +64,14 @@ export class gameBoard {
 			}
 		}
 		location = location.sort();
-		this.ships.push({ newShip, location });
+		this.ships.push({ newShip, location, root, direction, shipEl });
 		return location;
 	}
 
 	receiveAttack(xAxis, yAxis) {
 		let hitTrack = 0;
 		for (let i = 0; i <= this.ships.length - 1; i++) {
-			if (this.ships[i].location.includes(`${xAxis},${yAxis}`)) {
+			if (this.ships[i].location.includes(`${yAxis},${xAxis}`)) {
 				this.ships[i].newShip.hit();
 				hitTrack = 1;
 				break;
@@ -78,8 +79,11 @@ export class gameBoard {
 		}
 		if (hitTrack === 0) {
 			this.misses.push(`${xAxis},${yAxis}`);
+			this.trackAllShips();
+			return "miss";
 		}
 		this.trackAllShips();
+		return "hit";
 	}
 
 	trackAllShips() {

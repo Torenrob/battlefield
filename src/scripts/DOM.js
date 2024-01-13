@@ -1,6 +1,7 @@
-import random from "../../node_modules/lodash/random.js";
+import random from "lodash/random.js";
 import * as gaming from "./gameboard.js";
 import logoImg from "../assets/imgbin_battleship-wii-u-xbox-360-nintendo-ds-png.png";
+import { compAttack } from "./compAttack.js";
 const logo = document.getElementById("logo");
 logo.src = logoImg;
 import battleshipH from "../assets/battleshipH.png";
@@ -47,6 +48,7 @@ const shipArrComp = [carrierImgComp, battleshipImgComp, destroyerImgComp, subImg
 export const playerGridElement = document.getElementById("playerGrid");
 export const computerGridElement = document.getElementById("computerGrid");
 const shipGrid = document.getElementById("shipGrid");
+const compShipGrid = document.getElementById("compShipGrid");
 const nameDialog = document.getElementById("nameDialog");
 const playerNameDisplay = document.getElementById("playerName");
 const placeShipNotice = document.getElementById("placeShipNotice");
@@ -106,7 +108,7 @@ function placeShips(shipArr, gameLogic, user, direction = "horizontal", occupied
 	if (user === "comp") {
 		direction = random(1, 2) === 1 ? "horizontal" : "vertical";
 		let xYCoor = direction === "horizontal" ? [`${random(1, 10)}`, `${random(1, 11 - length)}`] : [`${random(length, 10)}`, `${random(1, 10)}`];
-		let shipSqrs = board.placeShip(length, xYCoor, direction);
+		let shipSqrs = board.placeShip(length, xYCoor, direction, ship);
 		if (shipSqrs.some((x) => occupiedSquares.includes(x))) {
 			shipArr.push(ship);
 			board.ships.pop();
@@ -117,7 +119,7 @@ function placeShips(shipArr, gameLogic, user, direction = "horizontal", occupied
 				placeShips(shipArr, gameLogic, "comp", direction, occupiedSquares);
 			} else {
 				alert("Comp Created - Game Start");
-				return;
+				gameLoop(gameLogic, gameLogic.player1);
 			}
 		}
 	} else {
@@ -217,7 +219,40 @@ function placeShipVisibility() {
 	}
 }
 
-function placeCompShips() {}
+function gameLoop(gameLogic, attackingPlayer = null) {
+	const compCells = Array.from(document.getElementsByClassName("computerCell"));
+	attackingPlayer = attackingPlayer ? attackingPlayer : gameLogic.player1;
+	let attackedPlayer = attackingPlayer === gameLogic.player1 ? gameLogic.computer : gameLogic.player1;
+	if (attackedPlayer === gameLogic.computer) {
+		compCells.forEach((cell) => {
+			cell.addEventListener("click", (x) => takeAttack(cell, attackedPlayer, compCells, gameLogic));
+		});
+	} else {
+		compAttack(gameLogic.player1, shipGrid);
+	}
+}
+
+function takeAttack(sqrTarget, attackedPlayer, compCells, gameLogic) {
+	let sqr = sqrTarget.attributes.grid.value.split(",");
+	console.log(attackedPlayer.board);
+	attackedPlayer.board.receiveAttack(sqr[1], sqr[0]);
+	compCells.forEach((x) => x.removeEventListener("click", (x) => takeAttack(cell, attackedPlayer, compCells)));
+	displaySunkCompShip(attackedPlayer);
+	gameLoop(gameLogic, gameLogic.computer);
+}
+
+function displaySunkCompShip(computerPlayer) {
+	let ships = computerPlayer.board.ships;
+	ships.forEach((ship) => {
+		if (ship.newShip.sunk) {
+			ship.shipEl.style.gridArea = `${ship.root[0]}/${ship.root[1]}`;
+			if (ship.direction === "vertical") {
+				ship.shipEl.classList.add("vertical");
+			}
+			compShipGrid.append(ship.shipEl);
+		}
+	});
+}
 
 export function gameMode(gameLogic) {
 	createGrid(playerGridElement, "player");

@@ -27,8 +27,13 @@ body {
 	cursor: pointer;
 }
 
-.cell:hover {
+.cell:hover,
+#compSelect {
 	background-color: rgba(0, 255, 255, 0.404);
+}
+
+.cell[game="compChoice"] {
+	background-color: rgba(109, 11, 11, 0.616);
 }
 
 #gridWrap {
@@ -43,7 +48,7 @@ body {
 }
 
 #computerGrid {
-	background-color: var(--form-bg-color);
+	display: grid;
 	border: var(--background-color) solid 1px;
 }
 
@@ -132,7 +137,8 @@ body {
 	padding-top: 10px;
 }
 
-#shipGrid {
+#shipGrid,
+#compShipGrid {
 	position: absolute;
 	height: 100%;
 	width: 100%;
@@ -147,7 +153,8 @@ body {
 	rotate: 90deg;
 }
 
-#shipGrid img {
+#shipGrid img,
+#compShipGrid img {
 	margin: 0px;
 }
 
