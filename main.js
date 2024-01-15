@@ -1820,6 +1820,7 @@ module.exports = __webpack_require__.p + "4982e2586b08b1b50c6f.png";
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   attackResultID: () => (/* binding */ attackResultID),
 /* harmony export */   computerGridElement: () => (/* binding */ computerGridElement),
 /* harmony export */   gameMode: () => (/* binding */ gameMode),
 /* harmony export */   playerGridElement: () => (/* binding */ playerGridElement)
@@ -2070,9 +2071,9 @@ function gameLoop(gameLogic, attackingPlayer = null) {
 function takeAttack(sqrTarget, attackedPlayer, compCells, gameLogic) {
 	let sqr = sqrTarget.attributes.grid.value.split(",");
 	let result = attackedPlayer.board.receiveAttack(sqr[1], sqr[0]);
-	result === "hit" ? sqrTarget.setAttribute("attack", "hit") : sqrTarget.setAttribute("attack", "miss");
+	attackResultID(sqr, result, "computer");
 	compCells.forEach((x) => x.removeEventListener("click", (x) => takeAttack(cell, attackedPlayer, compCells)));
-	displaySunkCompShip(attackedPlayer);
+	setTimeout(() => displaySunkCompShip(attackedPlayer), 2400);
 	gameLoop(gameLogic, gameLogic.computer);
 }
 
@@ -2089,7 +2090,28 @@ function displaySunkCompShip(computerPlayer) {
 	});
 }
 
-fynctuin;
+function attackResultID(choice, result, user) {
+	let def = "miss";
+
+	let el = document.querySelector(`.${user}Cell[grid='${choice[0]},${choice[1]}']`);
+	switchCompChoice(el, def);
+	setTimeout(() => switchCompChoice(el, def), 300);
+	setTimeout(() => switchCompChoice(el, def), 600);
+	setTimeout(() => switchCompChoice(el, def), 900);
+	setTimeout(() => switchCompChoice(el, def), 1200);
+	setTimeout(() => switchCompChoice(el, def), 1500);
+	setTimeout(() => switchCompChoice(el, result), 1800);
+	setTimeout(() => switchCompChoice(el), 2100);
+	setTimeout(() => switchCompChoice(el, result), 2400);
+
+	function switchCompChoice(elem, result) {
+		if (elem.hasAttribute("attack")) {
+			elem.removeAttribute("attack");
+		} else {
+			elem.setAttribute("attack", `${result}`);
+		}
+	}
+}
 
 function gameMode(gameLogic) {
 	createGrid(playerGridElement, "player");
@@ -2112,6 +2134,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   compAttack: () => (/* binding */ compAttack)
 /* harmony export */ });
 /* harmony import */ var lodash_random_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash/random.js */ "./node_modules/lodash/random.js");
+/* harmony import */ var _DOM_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DOM.js */ "./src/scripts/DOM.js");
+
 
 
 let pastChoices = [];
@@ -2142,21 +2166,11 @@ function compAttack(attackedPlayer) {
 		}
 	}, 100);
 
+	setTimeout(() => clearInterval(int), 2600);
+
 	let result = attackedPlayer.board.receiveAttack(choice[1], choice[0]);
 
-	setTimeout(() => {
-		clearInterval(int);
-		let el = document.querySelector(`[grid='${choice[0]},${choice[1]}']`);
-		switchCompChoice(el);
-		setTimeout(() => switchCompChoice(el, result), 300);
-		setTimeout(() => switchCompChoice(el, result), 600);
-		setTimeout(() => switchCompChoice(el, result), 900);
-		setTimeout(() => switchCompChoice(el, result), 1200);
-		setTimeout(() => switchCompChoice(el, result), 1500);
-		setTimeout(() => switchCompChoice(el, result), 1800);
-		setTimeout(() => switchCompChoice(el, result), 2100);
-		setTimeout(() => switchCompChoice(el, result), 2400);
-	}, 2800);
+	setTimeout(() => (0,_DOM_js__WEBPACK_IMPORTED_MODULE_1__.attackResultID)(choice, result, "player"), 2600);
 }
 
 function hoverCells(sqr) {
@@ -2164,14 +2178,6 @@ function hoverCells(sqr) {
 	let el = document.querySelector(`[grid='${sqr[0]},${sqr[1]}']`);
 	el.setAttribute("id", "compSelect");
 	setTimeout(() => el.removeAttribute("id"), 120);
-}
-
-function switchCompChoice(elem, result) {
-	if (elem.hasAttribute("attack")) {
-		elem.removeAttribute("attack");
-	} else {
-		elem.setAttribute("attack", `${result}`);
-	}
 }
 
 
