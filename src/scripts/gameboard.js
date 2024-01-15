@@ -78,7 +78,7 @@ export class gameBoard {
 			}
 		}
 		if (hitTrack === 0) {
-			this.misses.push(`${xAxis},${yAxis}`);
+			this.misses.push(`${yAxis},${xAxis}`);
 			this.trackAllShips();
 			return "miss";
 		}

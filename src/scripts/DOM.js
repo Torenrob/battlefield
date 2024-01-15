@@ -228,14 +228,14 @@ function gameLoop(gameLogic, attackingPlayer = null) {
 			cell.addEventListener("click", (x) => takeAttack(cell, attackedPlayer, compCells, gameLogic));
 		});
 	} else {
-		compAttack(gameLogic.player1, shipGrid);
+		compAttack(attackedPlayer);
 	}
 }
 
 function takeAttack(sqrTarget, attackedPlayer, compCells, gameLogic) {
 	let sqr = sqrTarget.attributes.grid.value.split(",");
-	console.log(attackedPlayer.board);
-	attackedPlayer.board.receiveAttack(sqr[1], sqr[0]);
+	let result = attackedPlayer.board.receiveAttack(sqr[1], sqr[0]);
+	result === "hit" ? sqrTarget.setAttribute("attack", "hit") : sqrTarget.setAttribute("attack", "miss");
 	compCells.forEach((x) => x.removeEventListener("click", (x) => takeAttack(cell, attackedPlayer, compCells)));
 	displaySunkCompShip(attackedPlayer);
 	gameLoop(gameLogic, gameLogic.computer);
@@ -253,6 +253,8 @@ function displaySunkCompShip(computerPlayer) {
 		}
 	});
 }
+
+fynctuin;
 
 export function gameMode(gameLogic) {
 	createGrid(playerGridElement, "player");

@@ -28,12 +28,13 @@ body {
 }
 
 .cell:hover,
-#compSelect {
+#compSelect,
+.cell[attack="miss"] {
 	background-color: rgba(0, 255, 255, 0.404);
 }
 
-.cell[game="compChoice"] {
-	background-color: rgba(109, 11, 11, 0.616);
+.cell[attack="hit"] {
+	background-color: rgba(63, 7, 7, 0.616);
 }
 
 #gridWrap {
@@ -61,8 +62,10 @@ body {
 	justify-content: center;
 	width: 300px;
 	height: 125px;
-	top: 320px;
-	left: 805px;
+	/* top: 320px;
+	left: 805px; */
+	justify-self: center;
+	align-self: center;
 	background-color: var(--form-bg-color);
 	border-radius: 15px;
 	z-index: 5;
@@ -92,7 +95,7 @@ body {
 	justify-self: center;
 	align-self: flex-end;
 	background-color: var(--form-bg-color);
-	width: 62.7%;
+	width: 400px;
 	text-align: center;
 	border-top-left-radius: 15px;
 	border-top-right-radius: 15px;
@@ -111,7 +114,7 @@ body {
 	justify-content: center;
 	background-color: var(--form-bg-color);
 	height: fit-content;
-	width: 62.8%;
+	width: 400px;
 	justify-self: center;
 	border-bottom-left-radius: 15px;
 	border-bottom-right-radius: 15px;
