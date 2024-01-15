@@ -235,9 +235,9 @@ function gameLoop(gameLogic, attackingPlayer = null) {
 function takeAttack(sqrTarget, attackedPlayer, compCells, gameLogic) {
 	let sqr = sqrTarget.attributes.grid.value.split(",");
 	let result = attackedPlayer.board.receiveAttack(sqr[1], sqr[0]);
-	result === "hit" ? sqrTarget.setAttribute("attack", "hit") : sqrTarget.setAttribute("attack", "miss");
+	attackResultID(sqr, result, "computer");
 	compCells.forEach((x) => x.removeEventListener("click", (x) => takeAttack(cell, attackedPlayer, compCells)));
-	displaySunkCompShip(attackedPlayer);
+	setTimeout(() => displaySunkCompShip(attackedPlayer), 2400);
 	gameLoop(gameLogic, gameLogic.computer);
 }
 
@@ -254,7 +254,28 @@ function displaySunkCompShip(computerPlayer) {
 	});
 }
 
-fynctuin;
+export function attackResultID(choice, result, user) {
+	let def = "miss";
+
+	let el = document.querySelector(`.${user}Cell[grid='${choice[0]},${choice[1]}']`);
+	switchCompChoice(el, def);
+	setTimeout(() => switchCompChoice(el, def), 300);
+	setTimeout(() => switchCompChoice(el, def), 600);
+	setTimeout(() => switchCompChoice(el, def), 900);
+	setTimeout(() => switchCompChoice(el, def), 1200);
+	setTimeout(() => switchCompChoice(el, def), 1500);
+	setTimeout(() => switchCompChoice(el, result), 1800);
+	setTimeout(() => switchCompChoice(el), 2100);
+	setTimeout(() => switchCompChoice(el, result), 2400);
+
+	function switchCompChoice(elem, result) {
+		if (elem.hasAttribute("attack")) {
+			elem.removeAttribute("attack");
+		} else {
+			elem.setAttribute("attack", `${result}`);
+		}
+	}
+}
 
 export function gameMode(gameLogic) {
 	createGrid(playerGridElement, "player");

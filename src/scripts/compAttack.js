@@ -1,4 +1,5 @@
 import random from "lodash/random.js";
+import { attackResultID } from "./DOM.js";
 
 let pastChoices = [];
 
@@ -28,21 +29,11 @@ export function compAttack(attackedPlayer) {
 		}
 	}, 100);
 
+	setTimeout(() => clearInterval(int), 2600);
+
 	let result = attackedPlayer.board.receiveAttack(choice[1], choice[0]);
 
-	setTimeout(() => {
-		clearInterval(int);
-		let el = document.querySelector(`[grid='${choice[0]},${choice[1]}']`);
-		switchCompChoice(el);
-		setTimeout(() => switchCompChoice(el, result), 300);
-		setTimeout(() => switchCompChoice(el, result), 600);
-		setTimeout(() => switchCompChoice(el, result), 900);
-		setTimeout(() => switchCompChoice(el, result), 1200);
-		setTimeout(() => switchCompChoice(el, result), 1500);
-		setTimeout(() => switchCompChoice(el, result), 1800);
-		setTimeout(() => switchCompChoice(el, result), 2100);
-		setTimeout(() => switchCompChoice(el, result), 2400);
-	}, 2800);
+	setTimeout(() => attackResultID(choice, result, "player"), 2600);
 }
 
 function hoverCells(sqr) {
@@ -50,12 +41,4 @@ function hoverCells(sqr) {
 	let el = document.querySelector(`[grid='${sqr[0]},${sqr[1]}']`);
 	el.setAttribute("id", "compSelect");
 	setTimeout(() => el.removeAttribute("id"), 120);
-}
-
-function switchCompChoice(elem, result) {
-	if (elem.hasAttribute("attack")) {
-		elem.removeAttribute("attack");
-	} else {
-		elem.setAttribute("attack", `${result}`);
-	}
 }
