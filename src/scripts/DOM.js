@@ -1,6 +1,7 @@
 import random from "lodash/random.js";
-import * as gaming from "./gameboard.js";
-import logoImg from "../assets/imgbin_battleship-wii-u-xbox-360-nintendo-ds-png.png";
+import { game, startGame } from "./index.js";
+import * as util from "./utils.js";
+import logoImg from "../assets/Untitled_Export-WVRdLY5XF.png";
 import { compAttack } from "./compAttack.js";
 const logo = document.getElementById("logo");
 logo.src = logoImg;
@@ -9,6 +10,7 @@ import carrierH from "../assets/carrierH.png";
 import destroyerH from "../assets/destroyerH.png";
 import patrolH from "../assets/patrolH.png";
 import subH from "../assets/subH.png";
+import { round } from "lodash";
 
 const battleshipImg = document.createElement("img");
 const carrierImg = document.createElement("img");
@@ -16,15 +18,15 @@ const destroyerImg = document.createElement("img");
 const patrolImg = document.createElement("img");
 const subImg = document.createElement("img");
 battleshipImg.src = battleshipH;
-battleshipImg.classList.add("battleship");
+battleshipImg.classList.add("Battleship");
 carrierImg.src = carrierH;
-carrierImg.classList.add("carrier");
+carrierImg.classList.add("Carrier");
 destroyerImg.src = destroyerH;
-destroyerImg.classList.add("destroyer");
+destroyerImg.classList.add("Destroyer");
 patrolImg.src = patrolH;
-patrolImg.classList.add("patrol");
+patrolImg.classList.add("Patrol");
 subImg.src = subH;
-subImg.classList.add("sub");
+subImg.classList.add("Sub");
 
 const battleshipImgComp = document.createElement("img");
 const carrierImgComp = document.createElement("img");
@@ -32,30 +34,41 @@ const destroyerImgComp = document.createElement("img");
 const patrolImgComp = document.createElement("img");
 const subImgComp = document.createElement("img");
 battleshipImgComp.src = battleshipH;
-battleshipImgComp.classList.add("battleship");
+battleshipImgComp.classList.add("Battleship");
 carrierImgComp.src = carrierH;
-carrierImgComp.classList.add("carrier");
+carrierImgComp.classList.add("Carrier");
 destroyerImgComp.src = destroyerH;
-destroyerImgComp.classList.add("destroyer");
+destroyerImgComp.classList.add("Destroyer");
 patrolImgComp.src = patrolH;
-patrolImgComp.classList.add("patrol");
+patrolImgComp.classList.add("Patrol");
 subImgComp.src = subH;
-subImgComp.classList.add("sub");
-
-const shipArrPlayer = [carrierImg, battleshipImg, destroyerImg, subImg, patrolImg];
-const shipArrComp = [carrierImgComp, battleshipImgComp, destroyerImgComp, subImgComp, patrolImgComp];
+subImgComp.classList.add("Sub");
 
 export const playerGridElement = document.getElementById("playerGrid");
 export const computerGridElement = document.getElementById("computerGrid");
-const shipGrid = document.getElementById("shipGrid");
-const compShipGrid = document.getElementById("compShipGrid");
+const shipGrid = document.createElement("div");
+shipGrid.setAttribute("id", "shipGrid");
+const playerGrid = document.getElementById("playerGrid");
+const compShipGrid = document.createElement("div");
+compShipGrid.setAttribute("id", "compShipGrid");
+const computerGrid = document.getElementById("computerGrid");
 const nameDialog = document.getElementById("nameDialog");
 const playerNameDisplay = document.getElementById("playerName");
 const placeShipNotice = document.getElementById("placeShipNotice");
 const vertHorz = document.getElementById("vertHorzWrap");
 const vertHorzChoice = document.getElementById("vertHorzChoice");
+const afterAttackMessage = document.getElementById("afterAttackMessage");
+const afterAttackDiv = document.getElementById("afterAttackDiv");
+const playerName = document.getElementById("playerName");
 
-function createGrid(gridElement, player = "computer") {
+export function gameMode(gameLogic, reset = null) {
+	createGrid(playerGridElement, shipGrid, "player");
+	createGrid(computerGridElement, compShipGrid);
+	getName(gameLogic, reset);
+}
+
+function createGrid(gridElement, shipGrid, player = "computer") {
+	gridElement.append(shipGrid);
 	for (let y = 1; y < 11; y++) {
 		for (let x = 1; x < 11; x++) {
 			const cell = document.createElement("div");
@@ -67,17 +80,25 @@ function createGrid(gridElement, player = "computer") {
 	}
 }
 
-function getName(gameLogic) {
-	nameDialog.style.visibility = "visible";
-	nameDialog.addEventListener("submit", (x) => {
-		x.preventDefault();
-		let name = x.target[0].value;
-		x.target.reset();
-		nameDialog.style.visibility = "hidden";
-		playerNameDisplay.textContent = name;
+function getName(gameLogic, reset) {
+	const shipArrPlayer = [carrierImg, battleshipImg, destroyerImg, subImg, patrolImg];
+	if (reset) {
+		gameLogic.player1.name = reset;
 		placeShipVisibility();
 		placeShips(shipArrPlayer, gameLogic, "player");
-	});
+	} else {
+		nameDialog.style.visibility = "visible";
+		nameDialog.addEventListener("submit", (x) => {
+			x.preventDefault();
+			let name = x.target[0].value;
+			x.target.reset();
+			nameDialog.style.visibility = "hidden";
+			playerNameDisplay.textContent = name;
+			gameLogic.player1.name = name;
+			placeShipVisibility();
+			placeShips(shipArrPlayer, gameLogic, "player");
+		});
+	}
 }
 
 function placeShips(shipArr, gameLogic, user, direction = "horizontal", occupiedSquares = []) {
@@ -88,19 +109,19 @@ function placeShips(shipArr, gameLogic, user, direction = "horizontal", occupied
 	let length;
 
 	switch (ship.classList[0]) {
-		case "carrier":
+		case "Carrier":
 			length = 5;
 			break;
-		case "battleship":
+		case "Battleship":
 			length = 4;
 			break;
-		case "destroyer":
+		case "Destroyer":
 			length = 3;
 			break;
-		case "sub":
+		case "Sub":
 			length = 3;
 			break;
-		case "patrol":
+		case "Patrol":
 			length = 2;
 			break;
 	}
@@ -108,8 +129,9 @@ function placeShips(shipArr, gameLogic, user, direction = "horizontal", occupied
 	if (user === "comp") {
 		direction = random(1, 2) === 1 ? "horizontal" : "vertical";
 		let xYCoor = direction === "horizontal" ? [`${random(1, 10)}`, `${random(1, 11 - length)}`] : [`${random(length, 10)}`, `${random(1, 10)}`];
-		let shipSqrs = board.placeShip(length, xYCoor, direction, ship);
-		if (shipSqrs.some((x) => occupiedSquares.includes(x))) {
+		let shipSqrs = board.placeShip(length, xYCoor, direction, ship.classList[0], ship);
+
+		if (util.noShipOverlap(shipSqrs, occupiedSquares)) {
 			shipArr.push(ship);
 			board.ships.pop();
 			placeShips(shipArr, gameLogic, "comp", direction, occupiedSquares);
@@ -118,8 +140,7 @@ function placeShips(shipArr, gameLogic, user, direction = "horizontal", occupied
 			if (shipArr.length > 0) {
 				placeShips(shipArr, gameLogic, "comp", direction, occupiedSquares);
 			} else {
-				alert("Comp Created - Game Start");
-				gameLoop(gameLogic, gameLogic.player1);
+				gameLoop();
 			}
 		}
 	} else {
@@ -142,7 +163,7 @@ function placeShips(shipArr, gameLogic, user, direction = "horizontal", occupied
 				return;
 			}
 			let xYCoor = ship.style.gridArea.split(" / ");
-			occupiedSquares = occupiedSquares.concat(board.placeShip(length, xYCoor, direction));
+			occupiedSquares = occupiedSquares.concat(board.placeShip(length, xYCoor, direction, ship.classList[0]));
 			playerCells.forEach((x) => {
 				x.removeEventListener("mouseover", gridL);
 				x.removeEventListener("click", clickL);
@@ -152,6 +173,7 @@ function placeShips(shipArr, gameLogic, user, direction = "horizontal", occupied
 				direction = "horizontal";
 				placeShips(shipArr, gameLogic, "player", direction, occupiedSquares);
 			} else {
+				const shipArrComp = [carrierImgComp, battleshipImgComp, destroyerImgComp, subImgComp, patrolImgComp];
 				placeShipVisibility();
 				placeShips(shipArrComp, gameLogic, "comp");
 			}
@@ -219,30 +241,41 @@ function placeShipVisibility() {
 	}
 }
 
-function gameLoop(gameLogic, attackingPlayer = null) {
-	const compCells = Array.from(document.getElementsByClassName("computerCell"));
-	attackingPlayer = attackingPlayer ? attackingPlayer : gameLogic.player1;
-	let attackedPlayer = attackingPlayer === gameLogic.player1 ? gameLogic.computer : gameLogic.player1;
-	if (attackedPlayer === gameLogic.computer) {
-		compCells.forEach((cell) => {
-			cell.addEventListener("click", (x) => takeAttack(cell, attackedPlayer, compCells, gameLogic));
-		});
+let roundCount = 0;
+function gameLoop() {
+	afterAttackDiv.style.visibility = "hidden";
+	if (roundCount % 2 === 0) {
+		util.hoverSwicth();
+		document.querySelector("#attackNotice").style.visibility = "visible";
+		computerGrid.addEventListener("mouseup", takeAttack);
 	} else {
-		compAttack(attackedPlayer);
+		compAttack(game);
 	}
+	roundCount++;
 }
 
-function takeAttack(sqrTarget, attackedPlayer, compCells, gameLogic) {
-	let sqr = sqrTarget.attributes.grid.value.split(",");
-	let result = attackedPlayer.board.receiveAttack(sqr[1], sqr[0]);
+let chosenSqrs = [];
+function takeAttack(sqr) {
+	sqr = sqr.target.attributes.grid.value.split(",");
+	if (util.checkChosenSqr(sqr, chosenSqrs)) {
+		roundCount--;
+		util.hoverSwicth();
+		gameLoop();
+		return;
+	}
+	document.querySelector("#attackNotice").style.visibility = "hidden";
+	chosenSqrs.push(sqr);
+	computerGrid.removeEventListener("mouseup", takeAttack);
+	util.hoverSwicth();
+	let result = game.computer.board.receiveAttack(sqr[1], sqr[0]);
 	attackResultID(sqr, result, "computer");
-	compCells.forEach((x) => x.removeEventListener("click", (x) => takeAttack(cell, attackedPlayer, compCells)));
-	setTimeout(() => displaySunkCompShip(attackedPlayer), 2400);
-	gameLoop(gameLogic, gameLogic.computer);
+	setTimeout(() => {
+		displaySunkCompShip();
+	}, 1500);
 }
 
-function displaySunkCompShip(computerPlayer) {
-	let ships = computerPlayer.board.ships;
+function displaySunkCompShip() {
+	let ships = game.computer.board.ships;
 	ships.forEach((ship) => {
 		if (ship.newShip.sunk) {
 			ship.shipEl.style.gridArea = `${ship.root[0]}/${ship.root[1]}`;
@@ -256,17 +289,16 @@ function displaySunkCompShip(computerPlayer) {
 
 export function attackResultID(choice, result, user) {
 	let def = "miss";
-
+	let attacker = user === "player" ? "computer" : game.player1;
 	let el = document.querySelector(`.${user}Cell[grid='${choice[0]},${choice[1]}']`);
 	switchCompChoice(el, def);
 	setTimeout(() => switchCompChoice(el, def), 300);
 	setTimeout(() => switchCompChoice(el, def), 600);
-	setTimeout(() => switchCompChoice(el, def), 900);
-	setTimeout(() => switchCompChoice(el, def), 1200);
-	setTimeout(() => switchCompChoice(el, def), 1500);
-	setTimeout(() => switchCompChoice(el, result), 1800);
-	setTimeout(() => switchCompChoice(el), 2100);
-	setTimeout(() => switchCompChoice(el, result), 2400);
+	setTimeout(() => switchCompChoice(el, result.str), 900);
+	setTimeout(() => {
+		switchCompChoice(el, result.str);
+		afterAttackDisplay(attacker, result);
+	}, 1200);
 
 	function switchCompChoice(elem, result) {
 		if (elem.hasAttribute("attack")) {
@@ -277,8 +309,63 @@ export function attackResultID(choice, result, user) {
 	}
 }
 
-export function gameMode(gameLogic) {
-	createGrid(playerGridElement, "player");
-	createGrid(computerGridElement);
-	getName(gameLogic);
+export function afterAttackDisplay(attacker, result) {
+	const btn = document.querySelector("#afterAttackDiv>button");
+
+	let message;
+	if (attacker === game.player1) {
+		switch (result.str) {
+			case "hit":
+				if (result.allShips) {
+					endGame(attacker);
+					return;
+				}
+				message = result.shipHit.sunk ? util.isShipSunk(attacker, result) : `${attacker.name}, it's a hit!`;
+				break;
+			case "miss":
+				message = "Missed. Better luck next round!";
+				break;
+		}
+	} else {
+		switch (result.str) {
+			case "hit":
+				if (result.allShips) {
+					endGame(attacker);
+					return;
+				}
+				message = result.shipHit.sunk ? util.isShipSunk(attacker, result) : `${game.player1.name} your ${result.shipHit.name} has been hit.`;
+				break;
+			case "miss":
+				message = "They missed! Your turn!";
+				break;
+		}
+	}
+
+	btn.innerText = "Continue";
+	afterAttackMessage.innerText = message;
+	afterAttackDiv.style.visibility = "visible";
+	btn.removeEventListener("click", resetGame);
+	btn.addEventListener("click", gameLoop);
+}
+
+function endGame(winner) {
+	let message = winner === game.player1 ? `${winner.name}, you sunk all enemy ships! Victory is YOURS!` : `The enemy has sunk all of your ships! Lick your wounds and try again.`;
+	const btn = document.querySelector("#afterAttackDiv>button");
+	btn.removeEventListener("click", gameLoop);
+	btn.innerText = "Start New Game";
+	afterAttackMessage.innerText = message;
+	afterAttackDiv.style.visibility = "visible";
+	btn.addEventListener("click", resetGame);
+}
+
+function resetGame() {
+	let name = playerName.innerText;
+	afterAttackDiv.style.visibility = "hidden";
+	roundCount = 0;
+	chosenSqrs = [];
+	playerGridElement.innerHTML = "";
+	computerGridElement.innerHTML = "";
+	shipGrid.innerHTML = "";
+	compShipGrid.innerHTML = "";
+	startGame(name);
 }

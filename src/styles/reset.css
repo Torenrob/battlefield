@@ -71,7 +71,8 @@ summary,
 time,
 mark,
 audio,
-video {
+video,
+span {
 	margin: 0;
 	padding: 0;
 	border: 0;

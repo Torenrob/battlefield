@@ -3,5 +3,11 @@ import "../styles/style.css";
 import * as gaming from "./gameboard.js";
 import * as dom from "./DOM.js";
 
-let game = new gaming.gamePlay();
-dom.gameMode(game);
+export let game;
+
+export function startGame(reset = null) {
+	game = new gaming.gamePlay();
+	dom.gameMode(game, reset);
+}
+
+startGame();

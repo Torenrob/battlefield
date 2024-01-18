@@ -12,14 +12,17 @@
    <body>
       <img id="logo">
       <form id="nameDialog">
-         <h2 style="text-align: center; color: white;">Enter Your Name</h2>
-         <div class="input-group">
+         <span style="text-align: center; color: white;">Enter Your Name</span>
+         <div class="input-group input-group-sm">
             <input class="form-control" type="text">
-            <button class="btn btn-primary">Submit</button>
+            <button class="btn btn-primary btn-sm">Submit</button>
          </div>
       </form>
       <div id="placeShipNotice">
          <h1>Place Ships</h1>
+      </div>
+      <div id="attackNotice">
+         <h1>Attack!</h1>
       </div>
       <div id="gridWrap">
          <div class="grid" id="playerGrid">
@@ -49,6 +52,12 @@
       </div>
       <h1 id="playerName" style="color: white;"></h1>
       <h1 id="compName" style="color: white;">Bot</h1>
+      <div id="afterAttackDiv">
+         <div id="afterAttackMessage">
+
+         </div>
+         <button class="btn btn-primary btn-sm"></button>
+      </div>
    </body>
 
 </html>

@@ -3,14 +3,14 @@ import { attackResultID } from "./DOM.js";
 
 let pastChoices = [];
 
-export function compAttack(attackedPlayer) {
+export function compAttack(game) {
 	let choiceArray = [];
 	let choice;
-	for (let i = 0; i <= 25; i++) {
+	for (let i = 0; i <= 10; i++) {
 		let y = random(1, 10);
 		let x = random(1, 10);
 		choiceArray.push(`${y},${x}`);
-		if (i != 25) continue;
+		if (i != 10) continue;
 		choice = choiceArray[choiceArray.length - 1].split(",");
 		//Checks if final choice is in pastChoices array
 		let repetition = pastChoices.some((x) => {
@@ -29,11 +29,13 @@ export function compAttack(attackedPlayer) {
 		}
 	}, 100);
 
-	setTimeout(() => clearInterval(int), 2600);
+	setTimeout(() => clearInterval(int), 1100);
 
-	let result = attackedPlayer.board.receiveAttack(choice[1], choice[0]);
+	let result = game.player1.board.receiveAttack(choice[1], choice[0]);
 
-	setTimeout(() => attackResultID(choice, result, "player"), 2600);
+	setTimeout(() => {
+		attackResultID(choice, result, "player");
+	}, 1100);
 }
 
 function hoverCells(sqr) {

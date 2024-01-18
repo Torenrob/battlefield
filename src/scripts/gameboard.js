@@ -1,8 +1,9 @@
 export class Ship {
-	constructor(length) {
+	constructor(length, name) {
 		this.length = length;
 		this.timesHit = 0;
 		this.sunk = false;
+		this.name = name;
 	}
 
 	hit() {
@@ -39,8 +40,8 @@ export class gameBoard {
 		return map;
 	}
 
-	placeShip(length, square, direction, shipEl = null) {
-		let newShip = new Ship(length);
+	placeShip(length, square, direction, name, shipEl = null) {
+		let newShip = new Ship(length, name);
 		let location = [];
 		let count = 0;
 		let root = square;
@@ -70,9 +71,11 @@ export class gameBoard {
 
 	receiveAttack(xAxis, yAxis) {
 		let hitTrack = 0;
+		let shipHit;
 		for (let i = 0; i <= this.ships.length - 1; i++) {
 			if (this.ships[i].location.includes(`${yAxis},${xAxis}`)) {
 				this.ships[i].newShip.hit();
+				shipHit = this.ships[i].newShip;
 				hitTrack = 1;
 				break;
 			}
@@ -80,15 +83,15 @@ export class gameBoard {
 		if (hitTrack === 0) {
 			this.misses.push(`${yAxis},${xAxis}`);
 			this.trackAllShips();
-			return "miss";
+			return { str: "miss" };
 		}
-		this.trackAllShips();
-		return "hit";
+		let allShips = this.trackAllShips();
+		return { str: "hit", shipHit, allShips };
 	}
 
 	trackAllShips() {
 		if (this.ships.every((ship) => ship.newShip.sunk)) {
-			this.allShipsSunk = true;
+			return (this.allShipsSunk = true);
 		}
 	}
 }
