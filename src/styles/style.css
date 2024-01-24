@@ -173,7 +173,6 @@ body {
 	grid-area: 1/1/1/5;
 	justify-self: center;
 	align-self: center;
-	padding-top: 10px;
 }
 
 #shipGrid,

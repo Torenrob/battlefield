@@ -345,6 +345,7 @@ export function afterAttackDisplay(attacker, result) {
 	afterAttackMessage.innerText = message;
 	afterAttackDiv.style.visibility = "visible";
 	btn.removeEventListener("click", resetGame);
+	btn.focus();
 	btn.addEventListener("click", gameLoop);
 }
 
@@ -355,6 +356,7 @@ function endGame(winner) {
 	btn.innerText = "Start New Game";
 	afterAttackMessage.innerText = message;
 	afterAttackDiv.style.visibility = "visible";
+	btn.focus();
 	btn.addEventListener("click", resetGame);
 }
 
