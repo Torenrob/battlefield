@@ -27,6 +27,7 @@ body {
 	text-align: center;
 	line-height: 40px;
 	cursor: auto;
+	caret: none;
 }
 
 .hover:hover,
